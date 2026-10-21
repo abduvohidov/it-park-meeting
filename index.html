@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="itpark-logo.png">
+<style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Обсуждение проектов IT Park</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: белый фон, по центру одна большая карточка-модалка; слайд проекта = скриншот в окне браузера (60%) + панель обсуждения (40%). Одна светлая тема — так задано. */
+:root{
+  --bg:#FFFFFF;
+  --card:#FFFFFF;
+  --ink:#2B2D2F;
+  --muted:#5F6560;
+  --faint:#949A93;
+  --line:#E4E8E1;
+  --soft:#F5F8F2;
+  --accent:#7DBA28;
+  --accent-ink:#5A9216;
+  --accent-soft:#EEF6E2;
+  --ok:#4A8A12;
+  --ok-soft:#EAF4DD;
+  --open:#B86E00;
+  --open-soft:#FFF3E0;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:24px;
+  --shadow:0 1px 2px rgba(11,21,48,.04),0 12px 32px rgba(11,21,48,.08),0 40px 80px -24px rgba(70,120,20,.12);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(125,186,40,.10),transparent 70%)}
+.stage{position:relative;z-index:1;height:100%;display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px;box-sizing:border-box}
+.modal{width:min(88vw,1760px);height:88%;max-height:1100px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;min-width:0}
+
+/* header */
+.bar{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;min-width:0}
+.brand .logo{height:30px;width:auto;flex:none;display:block}
+.brand small{font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .spacer{flex:1}
+.counter{font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted);white-space:nowrap}
+.counter b{color:var(--ink)}
+.icon-btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:500;font-size:14px;color:var(--muted);white-space:nowrap}
+.icon-btn:hover{border-color:var(--accent-ink);color:var(--accent-ink)}
+.icon-btn kbd{font-family:var(--font);font-size:11px;padding:1px 6px;border-radius:5px;background:var(--soft);border:1px solid var(--line);color:var(--faint)}
+.icon-btn svg{width:16px;height:16px;flex:none}
+
+/* slide area */
+.viewport{position:relative;overflow:hidden;min-height:0}
+.slide{position:absolute;inset:0;overflow:auto;padding:clamp(20px,3vw,48px);box-sizing:border-box;animation:slideIn .45s cubic-bezier(.2,.7,.2,1) both}
+@keyframes slideIn{from{opacity:0;transform:translateX(var(--dx,24px))}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:fadeOnly .2s both}@keyframes fadeOnly{from{opacity:0}to{opacity:1}}}
+
+/* footer */
+.foot{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;border-top:1px solid var(--line)}
+.nav-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}
+.nav-btn:hover:not(:disabled){border-color:var(--accent-ink);color:var(--accent-ink)}
+.nav-btn.next{background:var(--accent);border-color:var(--accent-ink);color:#fff;font-weight:700}
+.nav-btn.next:hover:not(:disabled){background:var(--accent-ink);color:#fff}
+.nav-btn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.dot{width:10px;height:10px;border-radius:99px;background:var(--line);border:0;padding:0;cursor:pointer;transition:width .3s,background .3s}
+.dot.on{width:32px;background:var(--accent)}
+
+/* title slide */
+.title-slide{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(24px,4vw,72px);align-items:center;min-height:100%}
+.title-slide .eyebrow{color:var(--accent-ink)}
+.title-logo{display:block;height:clamp(48px,5vw,84px);width:auto;max-width:100%;margin-bottom:clamp(24px,3vw,48px)}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.title-slide h1{font-size:clamp(40px,5.4vw,92px);line-height:1.02;letter-spacing:-.035em;font-weight:800;margin:16px 0 28px;text-wrap:balance}
+.title-slide h1 span{color:var(--accent-ink)}
+.meta{display:flex;flex-wrap:wrap;gap:12px 28px;color:var(--muted);font-size:clamp(16px,1.3vw,22px)}
+.meta b{display:block;color:var(--ink);font-weight:600}
+.agenda{display:flex;flex-direction:column;gap:12px}
+.agenda h3{margin:0 0 4px}
+.agenda-item{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-align:left;padding:18px 20px;border-radius:16px;border:1px solid var(--line);background:var(--card);cursor:pointer;transition:border-color .2s,transform .2s}
+.agenda-item:hover{border-color:var(--accent-ink);transform:translateX(4px)}
+.agenda-item .n{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-variant-numeric:tabular-nums}
+.agenda-item b{display:block;font-size:clamp(16px,1.25vw,21px)}
+.agenda-item small{color:var(--muted);font-size:14px;word-break:break-all}
+.agenda-item .arr{color:var(--faint)}
+
+/* project slide */
+.proj{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(20px,2.6vw,48px);height:100%;min-height:520px}
+.browser{height:100%;min-height:320px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--soft);box-shadow:0 8px 24px rgba(11,21,48,.06)}
+.chrome{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.lights{display:flex;gap:7px;flex:none}
+.lights i{width:12px;height:12px;border-radius:99px;display:block}
+.lights i:nth-child(1){background:#FF5F57}.lights i:nth-child(2){background:#FEBC2E}.lights i:nth-child(3){background:#28C840}
+.addr{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:8px;background:var(--soft);color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.addr svg{width:13px;height:13px;flex:none;color:var(--ok)}
+.addr span{overflow:hidden;text-overflow:ellipsis}
+.shot{flex:1;min-height:0;position:relative;border:0;padding:0;margin:0;background:var(--card);cursor:zoom-in;display:block;width:100%}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.shot .zoom{position:absolute;right:14px;bottom:14px;background:rgba(11,21,48,.78);color:#fff;font-size:13px;font-weight:500;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .2s}
+.shot:hover .zoom,.shot:focus-visible .zoom{opacity:1}
+.placeholder{flex:1;display:grid;place-items:center;text-align:center;padding:24px;background:
+  linear-gradient(var(--line) 1px,transparent 1px) 0 0/32px 32px,
+  linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/32px 32px,var(--soft)}
+.placeholder .ph{display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--card);padding:28px 32px;border-radius:16px;border:1px solid var(--line);max-width:80%}
+.placeholder svg{width:44px;height:44px;color:var(--accent-ink)}
+.placeholder b{font-size:clamp(16px,1.3vw,22px);word-break:break-all}
+.placeholder small{color:var(--muted)}
+
+.info{display:flex;flex-direction:column;gap:20px;min-width:0;overflow:auto;padding-right:4px}
+.info h2{font-size:clamp(28px,2.8vw,48px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:6px 0 0;text-wrap:balance}
+.desc{font-size:clamp(16px,1.2vw,20px);color:var(--muted);margin:0;max-width:60ch}
+.block{border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.block-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.block h3{margin:0;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.progress{font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.progress.done{color:var(--ok)}
+.qs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.q{display:flex;gap:12px;align-items:flex-start;padding:9px 8px;border-radius:10px;cursor:pointer;font-size:clamp(15px,1.1vw,19px);line-height:1.4}
+.q:hover{background:var(--soft)}
+.q input{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;margin:1px 0 0;border:2px solid #C3CBDC;border-radius:7px;display:grid;place-items:center;cursor:pointer;transition:background .15s,border-color .15s}
+.q input::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px) scale(0);transition:transform .15s}
+.q input:checked{background:var(--ok);border-color:var(--ok)}
+.q input:checked::after{transform:rotate(45deg) translate(-1px,-1px) scale(1)}
+.q input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(74,138,18,.5)}
+textarea{width:100%;box-sizing:border-box;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--soft);font-size:16px;line-height:1.5}
+textarea:focus{outline:none;border-color:var(--accent-ink);background:var(--card);box-shadow:0 0 0 3px var(--accent-soft)}
+.saved{font-size:12px;color:var(--faint);margin-top:6px;min-height:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 24px;border-radius:14px;font-weight:600;font-size:17px;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent-ink);color:#fff;font-weight:700}
+.btn.primary:hover{background:var(--accent-ink)}
+.btn.ghost:hover{border-color:var(--accent-ink);color:var(--accent-ink)}
+.info-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 20px}
+.info-head > div{min-width:0}
+.info-head .btn{flex:none}
+
+.lb-bar{display:flex;align-items:center;gap:14px;color:#fff;font-weight:500;font-variant-numeric:tabular-nums}
+.lb-bar .lb-nav{color:#fff;background:rgba(255,255,255,.12);border-color:transparent;font-size:18px}
+.lb-bar .lb-nav:hover{background:var(--accent);color:#fff}
+.shot-col{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
+.shot-col .browser{flex:1;height:auto}
+.shot-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.shot-tab{height:36px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:500;font-size:14px;color:var(--muted)}
+.shot-tab:hover{border-color:var(--accent-ink);color:var(--accent-ink)}
+.shot-tab.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+
+/* summary */
+.sum-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px}
+.sum-head h2{font-size:clamp(30px,3.2vw,56px);letter-spacing:-.03em;font-weight:800;margin:6px 0 12px;line-height:1.05}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.open{background:var(--open-soft);color:var(--open)}
+.chip.notes{background:var(--accent-soft);color:var(--accent-ink)}
+.sum-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.copy-status{font-size:14px;color:var(--ok);font-weight:500;min-width:1px}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}
+.sum-card{border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.sum-card header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sum-card h3{margin:0;font-size:clamp(18px,1.4vw,24px);letter-spacing:-.015em}
+.sum-card .url{font-size:13px;color:var(--muted);word-break:break-all}
+.sum-card .go{flex:none;font-size:13px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+.sum-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sum-list li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:15px;line-height:1.4}
+.st{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-top:1px;white-space:nowrap}
+.st.ok{background:var(--ok-soft);color:var(--ok)}
+.st.open{background:var(--open-soft);color:var(--open)}
+.sum-notes{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:15px;white-space:pre-wrap}
+.sum-notes.empty{color:var(--faint)}
+.sum-notes b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);display:flex;flex-direction:column;padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));box-sizing:border-box;animation:fadeOnly .2s both}
+@keyframes fadeOnly{from{opacity:0}to{opacity:1}}
+.ov-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 auto 24px;width:min(1400px,100%)}
+.ov-head h2{margin:0;font-size:24px;letter-spacing:-.02em}
+.ov-grid{width:min(1400px,100%);margin:0 auto;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:20px;align-content:start;padding:4px}
+.thumb{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:12px;transition:border-color .2s,transform .2s,box-shadow .2s}
+.thumb:hover{border-color:var(--accent-ink);transform:translateY(-3px);box-shadow:0 12px 24px rgba(11,21,48,.08)}
+.thumb.cur{border-color:var(--accent-ink);box-shadow:0 0 0 3px var(--accent-soft)}
+.thumb .mini{aspect-ratio:16/10;max-width:100%;border-radius:10px;background:var(--soft);overflow:hidden;position:relative;display:grid;place-items:center}
+.thumb .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.thumb .mini .t{font-weight:800;font-size:18px;letter-spacing:-.02em;padding:16px;text-align:center;color:var(--ink)}
+.thumb .mini.accent{background:var(--accent)}
+.thumb .mini.accent .t{color:#fff}
+.thumb .mini svg{width:32px;height:32px;color:var(--accent-ink)}
+.thumb .lbl{display:flex;gap:10px;align-items:baseline}
+.thumb .lbl i{font-style:normal;color:var(--faint);font-variant-numeric:tabular-nums;font-weight:600}
+.thumb .lbl b{font-weight:600}
+.lightbox{background:rgba(11,21,48,.92);backdrop-filter:none;align-items:center;justify-content:center;cursor:zoom-out}
+.lightbox{gap:16px}
+.lightbox img{max-width:100%;max-height:calc(100% - 72px);object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lightbox .close{position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:max(20px,env(safe-area-inset-right,0px));color:#fff;background:rgba(255,255,255,.12);border-color:transparent}
+
+/* responsive */
+@media (max-width:980px){
+  .title-slide,.proj{grid-template-columns:1fr;height:auto;min-height:0}
+  .browser{height:auto}
+  .shot,.placeholder{flex:none;aspect-ratio:16/10;min-height:0}
+  .info{overflow:visible}
+}
+@media (max-width:640px){
+  .modal{width:100%;height:100%;max-height:none;border-radius:18px}
+  .bar,.foot{padding:12px 14px}
+  .brand small,.icon-btn kbd,.hide-sm{display:none}
+  .nav-btn{padding:0 14px}
+  .slide{padding:18px}
+}
+@media (min-width:1900px){body{font-size:18px}}
+</style>
+
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="stage">
+  <main class="modal" aria-live="polite">
+    <header class="bar">
+      <div class="brand"><img class="logo" src="itpark-logo.png" alt="IT Park Uzbekistan"><small id="brandSub"></small></div>
+      <div class="spacer"></div>
+      <div class="counter" id="counter"></div>
+      <button class="icon-btn" id="btnOverview" type="button" title="Все слайды (Esc)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        <span class="hide-sm">Все слайды</span><kbd>Esc</kbd>
+      </button>
+      <button class="icon-btn" id="btnFs" type="button" title="Полноэкранный режим (F)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5.5v-4h4M14.5 5.5v-4h-4M1.5 10.5v4h4M14.5 10.5v4h-4"/></svg>
+        <span class="hide-sm" id="fsLabel">На весь экран</span><kbd>F</kbd>
+      </button>
+    </header>
+    <div class="viewport" id="viewport"></div>
+    <footer class="foot">
+      <button class="nav-btn" id="btnPrev" type="button">← Назад</button>
+      <div class="dots" id="dots"></div>
+      <button class="nav-btn next" id="btnNext" type="button">Далее →</button>
+    </footer>
+  </main>
+</div>
+
+<div class="overlay" id="overview" hidden>
+  <div class="ov-head"><h2>Все слайды</h2><button class="icon-btn" type="button" id="ovClose">Закрыть <kbd>Esc</kbd></button></div>
+  <div class="ov-grid" id="ovGrid"></div>
+</div>
+
+<div class="overlay lightbox" id="lightbox" hidden>
+  <button class="icon-btn close" type="button" id="lbClose">Закрыть <kbd>Esc</kbd></button>
+  <img id="lbImg" alt="">
+  <div class="lb-bar" id="lbBar">
+    <button class="icon-btn lb-nav" type="button" id="lbPrev" aria-label="Предыдущий скриншот">←</button>
+    <span id="lbCap"></span>
+    <button class="icon-btn lb-nav" type="button" id="lbNext" aria-label="Следующий скриншот">→</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ДАННЫЕ ПРЕЗЕНТАЦИИ — редактируйте здесь
+   screenshots: список скриншотов { src, label }. Пустой список — будет заглушка.
+   ===================================================================== */
+const MEETING = {
+  title: "Обсуждение проектов IT Park",
+  department: "Отдел цифровизации, IT Park",
+  date: ""               // пусто — подставится сегодняшняя дата
+};
+
+const SLIDES = [
+  { type: "title" },
+  {
+    type: "project",
+    id: "website",
+    title: "Website IT PARK",
+    url: "https://it-park-two.vercel.app/",
+    screenshots: [
+      { src: "shots/website-classic.jpg", label: "Главная" },
+      { src: "shots/website-ai.jpg", label: "Режим AI" },
+      { src: "shots/website-corporate.jpg", label: "Режим Corporate" }
+    ],
+    description: "Новая версия публичного сайта it-park.uz на React. Сейчас работает тестовый стенд на Vercel.",
+    questions: [
+      "Утвердить структуру разделов и главную страницу"
+    ]
+  },
+  {
+    type: "project",
+    id: "raqamli",
+    title: "Raqamli IT Park",
+    url: "https://raqamli.it-park.uz/",
+    screenshots: [
+      { src: "shots/raqamli-main.jpg", label: "Главная" }
+    ],
+    description: "Аналитическая панель IT Park: стартапы, IT-экспорт, рабочие места, резиденты и экспорт по регионам.",
+    questions: [
+      "Главная страница",
+      "Глобальный поиск",
+      "IT-Экспорт → Расширенные данные",
+      "IT-Экспорт → Распределение"
+    ]
+  },
+  {
+    type: "project",
+    id: "wall",
+    title: "Видеостенд маркетинга и экспорта",
+    url: "https://raqamli-itpark.netlify.app/#/processes",
+    screenshots: [
+      { src: "shots/wall-marketing.jpg", label: "Маркетинг · обзор" }
+    ],
+    description: "Экран видеостены «Маркетинг · обзор»: лиды, квалификация, follow-up и расходы из CRM Bitrix24 в реальном времени.",
+    questions: [
+      "Экраны «Маркетинг»",
+      "Экраны «Экспорт»",
+      "Экраны «Резиденты» уже в релизе — поставить на монитор Лазизака"
+    ]
+  },
+  {
+    type: "project",
+    id: "outsource",
+    title: "Outsource.gov.uz — новая версия с ИИ",
+    url: "https://www.outsource.gov.uz/ru",
+    screenshots: [
+      { src: "shots/outsource-current.jpg", label: "Текущая версия" }
+    ],
+    description: "Платформа для иностранных компаний, которые открывают аутсорсинг в Узбекистане. Нужна новая версия, построенная вокруг ИИ.",
+    questions: [
+      "Предложение Азаматака отделу маркетинга: сделать вместе с ИИ — пользователь вводит запрос при входе на сайт, и для него собирается индивидуальная страница"
+    ]
+  },
+  {
+    type: "project",
+    id: "my-itpark",
+    title: "my.it-park.uz",
+    url: "https://my.it-park.uz/",
+    screenshots: [
+      { src: "shots/my-itpark-current.jpg", label: "Текущая версия" }
+    ],
+    description: "Портал для компаний: стать резидентом IT Park, налоговый калькулятор, FAQ и вход в личный кабинет.",
+    questions: [
+      "Реализовать новую версию сайта"
+    ]
+  }
+];
+
+/* =====================================================================
+   Логика — ниже менять не нужно
+   ===================================================================== */
+const STORE_KEY = "itpark-meeting-v1";
+const projects = SLIDES.filter(s => s.type === "project");
+let state = { checks: {}, notes: {}, slide: 0 };
+try { const raw = localStorage.getItem(STORE_KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const prettyUrl = u => String(u).replace(/^https?:\/\//, "").replace(/\/$/, "");
+const dateStr = MEETING.date || new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+const checked = (p, i) => !!(state.checks[p.id] && state.checks[p.id][i]);
+
+const ICON_GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.6 2.8 3.9 6 3.9 9.5s-1.3 6.7-3.9 9.5c-2.6-2.8-3.9-6-3.9-9.5S9.4 5.3 12 2.5z"/></svg>';
+const ICON_LOCK = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 7V5a4 4 0 1 1 8 0v2h.5A1.5 1.5 0 0 1 14 8.5v5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5v-5A1.5 1.5 0 0 1 3.5 7H4zm2 0h4V5a2 2 0 1 0-4 0v2z"/></svg>';
+
+$("#brandSub").textContent = "· " + MEETING.department;
+
+let cur = Math.min(Math.max(0, state.slide | 0), SLIDES.length - 1);
+
+/* ---------- рендер слайдов ---------- */
+function renderTitle() {
+  const items = projects.map((p, k) => `
+    <button class="agenda-item" type="button" data-go="${SLIDES.indexOf(p)}">
+      <span class="n">${k + 1}</span>
+      <span><b>${esc(p.title)}</b><small>${esc(prettyUrl(p.url))}</small></span>
+      <span class="arr">→</span>
+    </button>`).join("");
+  return `<div class="title-slide">
+    <div>
+      <img class="title-logo" src="itpark-logo.png" alt="IT Park Uzbekistan">
+      <div class="eyebrow">Встреча с руководителем</div>
+      <h1>${esc(MEETING.title).replace("IT Park", "<span>IT Park</span>")}</h1>
+      <div class="meta">
+        <div><span>Дата</span><b>${esc(dateStr)}</b></div>
+        <div><span>Отдел</span><b>${esc(MEETING.department)}</b></div>
+      </div>
+    </div>
+    <div class="agenda">
+      <div class="eyebrow">Повестка · ${projects.length} ${((n) => n % 10 === 1 && n % 100 !== 11 ? "проект" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "проекта" : "проектов")(projects.length)}</div>
+      ${items}
+    </div>
+  </div>`;
+}
+
+const shotsOf = p => p.screenshots || (p.screenshot ? [{ src: p.screenshot, label: "" }] : []);
+const activeShot = {};
+function renderTabs(p) {
+  const list = shotsOf(p), a = activeShot[p.id] || 0;
+  if (list.length < 2) return "";
+  return `<div class="shot-tabs" id="tabs-${p.id}">${list.map((x, i) =>
+    `<button class="shot-tab ${i === a ? "on" : ""}" type="button" data-shot="${p.id}" data-si="${i}">${esc(x.label || "Скриншот " + (i + 1))}</button>`).join("")}</div>`;
+}
+function renderShot(p) {
+  const list = shotsOf(p), a = activeShot[p.id] || 0;
+  if (list.length) {
+    return `<button class="shot" type="button" data-lightbox="${p.id}" aria-label="Открыть скриншот на весь экран">
+      <img id="shotimg-${p.id}" src="${esc(list[a].src)}" alt="Скриншот ${esc(p.title)}"><span class="zoom">Увеличить</span></button>`;
+  }
+  return `<div class="placeholder"><div class="ph">${ICON_GLOBE}<b>${esc(prettyUrl(p.url))}</b><small>Скриншот не добавлен</small></div></div>`;
+}
+
+function progressText(p) {
+  const n = p.questions.filter((_, i) => checked(p, i)).length;
+  return { n, html: `${n} / ${p.questions.length} решено`, done: n === p.questions.length && n > 0 };
+}
+
+function renderProject(p) {
+  const k = projects.indexOf(p) + 1;
+  const pr = progressText(p);
+  const qs = p.questions.map((q, i) => `
+    <li><label class="q" for="q-${p.id}-${i}">
+      <input type="checkbox" id="q-${p.id}-${i}" data-p="${p.id}" data-i="${i}" ${checked(p, i) ? "checked" : ""}>
+      <span>${esc(q)}</span></label></li>`).join("");
+  return `<div class="proj">
+    <div class="shot-col">
+    <div class="browser">
+      <div class="chrome"><span class="lights"><i></i><i></i><i></i></span>
+        <div class="addr">${ICON_LOCK}<span>${esc(prettyUrl(p.url))}</span></div></div>
+      ${renderShot(p)}
+    </div>
+    ${renderTabs(p)}
+    </div>
+    <div class="info">
+      <div class="info-head">
+        <div>
+          <div class="eyebrow">Проект ${k} из ${projects.length}</div>
+          <h2>${esc(p.title)}</h2>
+        </div>
+        <a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Открыть сайт →</a>
+      </div>
+      <p class="desc">${esc(p.description)}</p>
+      <div class="block">
+        <div class="block-head"><h3>Вопросы для обсуждения</h3>
+          <span class="progress ${pr.done ? "done" : ""}" id="prog-${p.id}">${pr.html}</span></div>
+        <ul class="qs">${qs}</ul>
+      </div>
+    </div>
+  </div>`;
+}
+
+function totals() {
+  let ok = 0, open = 0, notes = 0;
+  projects.forEach(p => { p.questions.forEach((_, i) => checked(p, i) ? ok++ : open++); if ((state.notes[p.id] || "").trim()) notes++; });
+  return { ok, open, notes };
+}
+
+function renderSummary() {
+  const t = totals();
+  const cards = projects.map(p => {
+    const items = p.questions.map((q, i) => ({ q, ok: checked(p, i) }))
+      .sort((a, b) => a.ok - b.ok)
+      .map(x => `<li><span class="st ${x.ok ? "ok" : "open"}">${x.ok ? "Решено" : "Открыто"}</span><span>${esc(x.q)}</span></li>`).join("");
+    return `<article class="sum-card">
+      <header><div><h3>${esc(p.title)}</h3><div class="url">${esc(prettyUrl(p.url))}</div></div>
+        <button class="go" type="button" data-go="${SLIDES.indexOf(p)}">К слайду</button></header>
+      <ul class="sum-list">${items}</ul>
+    </article>`;
+  }).join("");
+  return `<div class="sum-head">
+      <div><div class="eyebrow">${esc(dateStr)}</div><h2>Итоги встречи</h2>
+        <div class="chips"><span class="chip ok">Решено: ${t.ok}</span><span class="chip open">Открыто: ${t.open}</span></div></div>
+      <div class="sum-actions">
+        <span class="copy-status" id="copyStatus" role="status"></span>
+        <button class="btn ghost" type="button" id="btnReset">Сбросить отметки</button>
+        <button class="btn primary" type="button" id="btnCopy">Скопировать итоги</button>
+      </div>
+    </div>
+    <div class="sum-grid">${cards}</div>`;
+}
+
+function summaryText() {
+  const t = totals();
+  const lines = [`Итоги встречи: ${MEETING.title}`, `${dateStr} · ${MEETING.department}`, `Решено: ${t.ok} · Открыто: ${t.open}`, ""];
+  projects.forEach((p, k) => {
+    lines.push(`${k + 1}. ${p.title} — ${p.url}`);
+    p.questions.forEach((q, i) => lines.push(`   ${checked(p, i) ? "✅" : "⬜️"} ${q}`));
+    lines.push("");
+  });
+  return lines.join("\n").trim();
+}
+
+/* ---------- навигация ---------- */
+const viewport = $("#viewport");
+function go(i, dir) {
+  i = Math.max(0, Math.min(SLIDES.length - 1, i));
+  const d = dir ?? (i >= cur ? 1 : -1);
+  cur = i; state.slide = i; save();
+  const s = SLIDES[i];
+  const el = document.createElement("section");
+  el.className = "slide";
+  el.style.setProperty("--dx", (d * 28) + "px");
+  el.innerHTML = s.type === "title" ? renderTitle() : s.type === "summary" ? renderSummary() : renderProject(s);
+  viewport.replaceChildren(el);
+  $("#counter").innerHTML = `<b>${i + 1}</b> / ${SLIDES.length}`;
+  $("#btnPrev").disabled = i === 0;
+  $("#btnNext").disabled = i === SLIDES.length - 1;
+  document.querySelectorAll(".dot").forEach((b, k) => { b.classList.toggle("on", k === i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
+}
+$("#dots").innerHTML = SLIDES.map((s, k) => `<button class="dot" type="button" aria-label="Слайд ${k + 1}" data-go="${k}"></button>`).join("");
+$("#btnPrev").onclick = () => go(cur - 1, -1);
+$("#btnNext").onclick = () => go(cur + 1, 1);
+
+/* делегирование событий */
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]");
+  if (g) { closeOverview(); go(+g.dataset.go); return; }
+  const lb = e.target.closest("[data-lightbox]");
+  if (lb) { openLightbox(lb.dataset.lightbox, activeShot[lb.dataset.lightbox] || 0); return; }
+  const tb = e.target.closest("[data-shot]");
+  if (tb) { setShot(tb.dataset.shot, +tb.dataset.si); return; }
+  if (e.target.id === "btnCopy") copySummary();
+  if (e.target.id === "btnReset") resetMarks(e.target);
+});
+document.addEventListener("change", e => {
+  const c = e.target;
+  if (c.matches("input[data-p]")) {
+    const id = c.dataset.p;
+    (state.checks[id] ||= [])[+c.dataset.i] = c.checked; save();
+    const p = projects.find(x => x.id === id), pr = progressText(p), el = $("#prog-" + id);
+    if (el) { el.textContent = pr.html; el.classList.toggle("done", pr.done); }
+  }
+});
+let noteTimer;
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.matches("textarea[data-notes]")) {
+    state.notes[t.dataset.notes] = t.value; save();
+    const s = $("#saved-" + t.dataset.notes); clearTimeout(noteTimer);
+    if (s) { s.textContent = "Сохранено"; noteTimer = setTimeout(() => s.textContent = "", 1500); }
+  }
+});
+
+/* копирование итогов */
+function copySummary() {
+  const text = summaryText(), st = $("#copyStatus");
+  const ok = () => { st.textContent = "Скопировано — можно вставить в Telegram или письмо"; setTimeout(() => st.textContent = "", 3500); };
+  const fallback = () => {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let done = false; try { done = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    if (done) ok(); else { st.style.color = "var(--open)"; st.textContent = "Не удалось скопировать автоматически. Выделите текст вручную."; }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
+let resetArmed = false;
+function resetMarks(btn) {
+  if (!resetArmed) { resetArmed = true; btn.textContent = "Точно сбросить? Нажмите ещё раз"; setTimeout(() => { resetArmed = false; if (btn.isConnected) btn.textContent = "Сбросить отметки"; }, 3000); return; }
+  resetArmed = false; state.checks = {}; state.notes = {}; save(); go(cur, 0);
+}
+
+/* обзор слайдов */
+function thumbHTML(s, k) {
+  let mini;
+  if (s.type === "title") mini = `<div class="mini accent"><span class="t">${esc(MEETING.title)}</span></div>`;
+  else if (s.type === "summary") mini = `<div class="mini"><span class="t">Итоги встречи</span></div>`;
+  else mini = `<div class="mini">${shotsOf(s).length ? `<img src="${esc(shotsOf(s)[0].src)}" alt="">` : ICON_GLOBE}</div>`;
+  const name = s.type === "title" ? "Титульный" : s.type === "summary" ? "Итоги и решения" : s.title;
+  return `<button class="thumb ${k === cur ? "cur" : ""}" type="button" data-go="${k}">${mini}<span class="lbl"><i>${k + 1}</i><b>${esc(name)}</b></span></button>`;
+}
+function openOverview() { $("#ovGrid").innerHTML = SLIDES.map(thumbHTML).join(""); $("#overview").hidden = false; const c = $("#ovGrid .cur"); c && c.focus(); }
+function closeOverview() { $("#overview").hidden = true; }
+$("#btnOverview").onclick = () => $("#overview").hidden ? openOverview() : closeOverview();
+$("#ovClose").onclick = closeOverview;
+
+/* lightbox */
+function setShot(id, i) {
+  const p = projects.find(x => x.id === id), list = shotsOf(p);
+  activeShot[id] = (i + list.length) % list.length;
+  const img = $("#shotimg-" + id); if (img) img.src = list[activeShot[id]].src;
+  document.querySelectorAll(`#tabs-${id} .shot-tab`).forEach((b, k) => b.classList.toggle("on", k === activeShot[id]));
+}
+let lb = null;
+function showLb() {
+  const p = projects.find(x => x.id === lb.id), list = shotsOf(p), x = list[lb.i];
+  $("#lbImg").src = x.src; $("#lbImg").alt = `${p.title} — ${x.label || ""}`;
+  $("#lbCap").textContent = `${p.title}${x.label ? " · " + x.label : ""}${list.length > 1 ? `  ${lb.i + 1} / ${list.length}` : ""}`;
+  $("#lbPrev").hidden = $("#lbNext").hidden = list.length < 2;
+}
+function openLightbox(id, i) { lb = { id, i }; showLb(); $("#lightbox").hidden = false; }
+function stepLb(d) { const n = shotsOf(projects.find(x => x.id === lb.id)).length; if (n < 2) return; lb.i = (lb.i + d + n) % n; setShot(lb.id, lb.i); showLb(); }
+function closeLightbox() { $("#lightbox").hidden = true; }
+$("#lightbox").onclick = e => { if (e.target.closest(".lb-nav")) return; closeLightbox(); };
+$("#lbPrev").onclick = () => stepLb(-1);
+$("#lbNext").onclick = () => stepLb(1);
+
+/* полноэкранный режим */
+function toggleFs() {
+  try {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()?.catch?.(() => {});
+    else document.exitFullscreen?.()?.catch?.(() => {});
+  } catch (e) {}
+}
+$("#btnFs").onclick = toggleFs;
+document.addEventListener("fullscreenchange", () => { $("#fsLabel").textContent = document.fullscreenElement ? "Выйти" : "На весь экран"; });
+
+/* клавиатура */
+document.addEventListener("keydown", e => {
+  const typing = e.target.matches("textarea, input[type=text]");
+  if (e.key === "Escape") {
+    e.preventDefault();
+    if (!$("#lightbox").hidden) return closeLightbox();
+    if (typing) return e.target.blur();
+    return $("#overview").hidden ? openOverview() : closeOverview();
+  }
+  if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!$("#lightbox").hidden) {
+    if (e.key === "ArrowRight") { e.preventDefault(); stepLb(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stepLb(-1); }
+    return;
+  }
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); closeOverview(); go(cur + 1, 1); }
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); closeOverview(); go(cur - 1, -1); }
+  else if (e.key === "f" || e.key === "F" || e.key === "а" || e.key === "А") { e.preventDefault(); toggleFs(); }
+});
+
+go(cur, 1);
+
+/* фон: сеть точек как на it-park-two.vercel.app */
+(function () {
+  const cv = document.getElementById("bg"), ctx = cv.getContext("2d");
+  if (!ctx) return;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, pts = [], mouse = { x: -9999, y: -9999 };
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.min(130, Math.round(W * H / 12000));
+    pts = Array.from({ length: n }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
+      r: Math.random() * 1.6 + .8, g: Math.random() < .55
+    }));
+  }
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    const D = 150;
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      if (!reduce) {
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+      }
+      for (let j = i + 1; j < pts.length; j++) {
+        const b = pts[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+        if (d < D) { ctx.strokeStyle = `rgba(90,146,22,${(1 - d / D) * .22})`; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      }
+      const md = Math.hypot(a.x - mouse.x, a.y - mouse.y);
+      if (md < 190) { ctx.strokeStyle = `rgba(125,186,40,${(1 - md / 190) * .45})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); }
+      ctx.fillStyle = a.g ? "rgba(125,186,40,.75)" : "rgba(120,128,118,.45)";
+      ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2); ctx.fill();
+    }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  addEventListener("resize", () => { resize(); if (reduce) frame(); });
+  addEventListener("pointermove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  addEventListener("pointerleave", () => { mouse.x = mouse.y = -9999; });
+  resize(); frame();
+})();
+</script>
+
+</body>
+</html>
