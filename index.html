@@ -142,6 +142,10 @@ textarea:focus{outline:none;border-color:var(--accent-ink);background:var(--card
 .info-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 20px}
 .info-head > div{min-width:0}
 .info-head .btn{flex:none}
+.head-actions{display:flex;flex-wrap:nowrap;gap:10px}
+.head-actions .btn{height:48px;padding:0 20px;font-size:16px}
+@media (max-width:640px){.head-actions{flex-wrap:wrap}}
+.head-actions:empty{display:none}
 
 .lb-bar{display:flex;align-items:center;gap:14px;color:#fff;font-weight:500;font-variant-numeric:tabular-nums}
 .lb-bar .lb-nav{color:#fff;background:rgba(255,255,255,.12);border-color:transparent;font-size:18px}
@@ -401,6 +405,9 @@ const SLIDES = [
     id: "sed",
     title: "Внедрение СЭД",
     agendaNote: "Directum и UzCloud · выбор системы",
+    links: [
+      { label: "Открыть UzCloud", url: "https://flow-demo.uzcloud.uz/documents" }
+    ],
     description: "Электронный документооборот: пилот Directum на серверах IT Park и тестирование UzCloud для выбора оптимального решения.",
     status: [
       {
@@ -685,8 +692,11 @@ function renderProject(p) {
           <div class="eyebrow">Проект ${k} из ${projects.length}</div>
           <h2>${esc(p.title)}</h2>
         </div>
+        <div class="head-actions">
         ${p.url ? `<a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Открыть сайт →</a>` : ""}
+        ${(p.links || []).map(l => `<a class="btn ghost" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} →</a>`).join("")}
         ${(p.docs || []).map((d, i) => `<button class="btn primary doc-btn" type="button" data-doc="${p.id}" data-di="${i}">${ICON_DOC}<span>Открыть документ</span></button>`).join("")}
+        </div>
       </div>
       <p class="desc">${esc(p.description)}</p>
       <div class="block">
