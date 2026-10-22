@@ -345,79 +345,6 @@ const SLIDES = [
   { type: "title" },
   {
     type: "project",
-    id: "website",
-    title: "Website IT PARK",
-    url: "https://it-park-two.vercel.app/",
-    screenshots: [
-      { src: "shots/website-classic.jpg", label: "Главная" },
-      { src: "shots/website-ai.jpg", label: "Режим AI" },
-      { src: "shots/website-corporate.jpg", label: "Режим Corporate" }
-    ],
-    description: "Новая версия публичного сайта it-park.uz на React. Сейчас работает тестовый стенд на Vercel.",
-    questions: [
-      "Утвердить структуру разделов и главную страницу"
-    ]
-  },
-  {
-    type: "project",
-    id: "raqamli",
-    title: "Raqamli IT Park",
-    url: "https://raqamli.it-park.uz/",
-    screenshots: [
-      { src: "shots/raqamli-main.jpg", label: "Главная" }
-    ],
-    description: "Аналитическая панель IT Park: стартапы, IT-экспорт, рабочие места, резиденты и экспорт по регионам.",
-    questions: [
-      "Главная страница",
-      "Глобальный поиск",
-      "IT-Экспорт → Расширенные данные",
-      "IT-Экспорт → Распределение"
-    ]
-  },
-  {
-    type: "project",
-    id: "wall",
-    title: "Видеостенды",
-    url: "https://raqamli-itpark.netlify.app/#/processes",
-    screenshots: [
-      { src: "shots/wall-marketing.jpg", label: "Маркетинг · обзор" }
-    ],
-    description: "Экран видеостены «Маркетинг · обзор»: лиды, квалификация, follow-up и расходы из CRM Bitrix24 в реальном времени.",
-    questions: [
-      "Экраны «Маркетинг»",
-      "Экраны «Экспорт»",
-      "Экраны «Резиденты» уже в релизе — поставить на монитор Лазизака",
-      "Утвердить экраны экспорта с Джахангиром Кагировым"
-    ]
-  },
-  {
-    type: "project",
-    id: "outsource",
-    title: "Outsource.gov.uz — новая версия с ИИ",
-    url: "https://www.outsource.gov.uz/ru",
-    screenshots: [
-      { src: "shots/outsource-current.jpg", label: "Текущая версия" }
-    ],
-    description: "Платформа для иностранных компаний, которые открывают аутсорсинг в Узбекистане. Нужна новая версия, построенная вокруг ИИ.",
-    questions: [
-      "Предложение Азаматака отделу маркетинга: сделать вместе с ИИ — пользователь вводит запрос при входе на сайт, и для него собирается индивидуальная страница"
-    ]
-  },
-  {
-    type: "project",
-    id: "my-itpark",
-    title: "my.it-park.uz",
-    url: "https://my.it-park.uz/",
-    screenshots: [
-      { src: "shots/my-itpark-current.jpg", label: "Текущая версия" }
-    ],
-    description: "Портал для компаний: стать резидентом IT Park, налоговый калькулятор, FAQ и вход в личный кабинет.",
-    questions: [
-      "Реализовать новую версию сайта"
-    ]
-  },
-  {
-    type: "project",
     id: "bitrix24",
     title: "Внедрение Битрикс24",
     agendaNote: "CRM · статус внедрения",
@@ -441,6 +368,32 @@ const SLIDES = [
     ],
     questions: [
       "IP-телефония: как интегрировать официальный номер с Б24, если у Узтелекома нет технической возможности"
+    ]
+  },
+  {
+    type: "project",
+    id: "bi",
+    title: "Внедрение BI (Qlik Sense)",
+    agendaNote: "DataCraft · дашборд «Анализ отчётов резидентов»",
+    description: "Аналитика на Qlik Sense. Вопросы со стороны IT Park и Nuvyaa проработаны, разработка на стороне DataCraft.",
+    status: [
+      {
+        done: [
+          "Все необходимые вопросы со стороны IT Park и Nuvyaa проработаны",
+          "Дальнейшая реализация на стороне DataCraft"
+        ],
+        doing: [
+          "DataCraft планирует до конца следующей недели завершить дашборд «Анализ отчётов резидентов»",
+          "В дашборде предусмотрено около 35 визуализаций: графики, диаграммы, KPI и аналитические таблицы"
+        ],
+        next: [
+          "Получение готового дашборда от DataCraft",
+          "Проверка корректности данных и соответствия согласованным требованиям"
+        ]
+      }
+    ],
+    questions: [
+      "Приёмка дашборда «Анализ отчётов резидентов» от DataCraft"
     ]
   },
   {
@@ -497,28 +450,63 @@ const SLIDES = [
   },
   {
     type: "project",
-    id: "bi",
-    title: "Внедрение BI (Qlik Sense)",
-    agendaNote: "DataCraft · дашборд «Анализ отчётов резидентов»",
-    description: "Аналитика на Qlik Sense. Вопросы со стороны IT Park и Nuvyaa проработаны, разработка на стороне DataCraft.",
-    status: [
-      {
-        done: [
-          "Все необходимые вопросы со стороны IT Park и Nuvyaa проработаны",
-          "Дальнейшая реализация на стороне DataCraft"
-        ],
-        doing: [
-          "DataCraft планирует до конца следующей недели завершить дашборд «Анализ отчётов резидентов»",
-          "В дашборде предусмотрено около 35 визуализаций: графики, диаграммы, KPI и аналитические таблицы"
-        ],
-        next: [
-          "Получение готового дашборда от DataCraft",
-          "Проверка корректности данных и соответствия согласованным требованиям"
-        ]
-      }
+    id: "raqamli",
+    title: "Raqamli IT Park",
+    url: "https://raqamli.it-park.uz/",
+    screenshots: [
+      { src: "shots/raqamli-main.jpg", label: "Главная" }
     ],
+    description: "Аналитическая панель IT Park: стартапы, IT-экспорт, рабочие места, резиденты и экспорт по регионам.",
     questions: [
-      "Приёмка дашборда «Анализ отчётов резидентов» от DataCraft"
+      "Главная страница",
+      "Глобальный поиск",
+      "IT-Экспорт → Расширенные данные",
+      "IT-Экспорт → Распределение",
+      "География"
+    ]
+  },
+  {
+    type: "project",
+    id: "wall",
+    title: "Видеостенды",
+    url: "https://raqamli-itpark.netlify.app/#/processes",
+    screenshots: [
+      { src: "shots/wall-marketing.jpg", label: "Маркетинг · обзор" }
+    ],
+    description: "Экран видеостены «Маркетинг · обзор»: лиды, квалификация, follow-up и расходы из CRM Bitrix24 в реальном времени.",
+    questions: [
+      "Экраны «Маркетинг»",
+      "Экраны «Экспорт»",
+      "Экраны «Резиденты» уже в релизе — поставить на монитор Лазизака",
+      "Утвердить экраны экспорта с Джахангиром Кагировым"
+    ]
+  },
+  {
+    type: "project",
+    id: "website",
+    title: "Website IT PARK",
+    url: "https://it-park-two.vercel.app/",
+    screenshots: [
+      { src: "shots/website-classic.jpg", label: "Главная" },
+      { src: "shots/website-ai.jpg", label: "Режим AI" },
+      { src: "shots/website-corporate.jpg", label: "Режим Corporate" }
+    ],
+    description: "Новая версия публичного сайта it-park.uz на React. Сейчас работает тестовый стенд на Vercel.",
+    questions: [
+      "Утвердить структуру разделов и главную страницу"
+    ]
+  },
+  {
+    type: "project",
+    id: "my-itpark",
+    title: "my.it-park.uz",
+    url: "https://my.it-park.uz/",
+    screenshots: [
+      { src: "shots/my-itpark-current.jpg", label: "Текущая версия" }
+    ],
+    description: "Портал для компаний: стать резидентом IT Park, налоговый калькулятор, FAQ и вход в личный кабинет.",
+    questions: [
+      "Реализовать новую версию сайта"
     ]
   },
   {
@@ -541,6 +529,19 @@ const SLIDES = [
     ],
     questions: [
       "Утвердить концепцию проекта"
+    ]
+  },
+  {
+    type: "project",
+    id: "outsource",
+    title: "Outsource.gov.uz — новая версия с ИИ",
+    url: "https://www.outsource.gov.uz/ru",
+    screenshots: [
+      { src: "shots/outsource-current.jpg", label: "Текущая версия" }
+    ],
+    description: "Платформа для иностранных компаний, которые открывают аутсорсинг в Узбекистане. Нужна новая версия, построенная вокруг ИИ.",
+    questions: [
+      "Предложение Азамата Одиловича отделу маркетинга: сделать вместе с ИИ — пользователь вводит запрос при входе на сайт, и для него собирается индивидуальная страница"
     ]
   }
 ];
