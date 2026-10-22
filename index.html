@@ -202,6 +202,11 @@ textarea:focus{outline:none;border-color:var(--accent-ink);background:var(--card
 .dv-body{width:min(1100px,100%);flex:1;min-height:0;overflow:auto;background:#E9ECE6;border-radius:0 0 16px 16px;padding:clamp(16px,3vw,40px);display:flex;flex-direction:column;align-items:center;gap:24px}
 .dv-body img{display:block;width:min(100%,900px);height:auto;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08),0 18px 40px rgba(0,0,0,.12);border-radius:4px}
 
+.figure-btn{flex:1;min-height:0;position:relative;border:0;margin:0;padding:clamp(12px,1.4vw,24px);background:var(--card);cursor:zoom-in;display:block;width:100%}
+.figure-btn img{width:100%;height:100%;object-fit:contain;display:block}
+.figure-btn .zoom{position:absolute;right:14px;bottom:14px;background:rgba(43,45,47,.78);color:#fff;font-size:13px;font-weight:500;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .2s}
+.figure-btn:hover .zoom,.figure-btn:focus-visible .zoom{opacity:1}
+
 /* summary */
 .sum-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px}
 .sum-head h2{font-size:clamp(30px,3.2vw,56px);letter-spacing:-.03em;font-weight:800;margin:6px 0 12px;line-height:1.05}
@@ -515,6 +520,28 @@ const SLIDES = [
     questions: [
       "Приёмка дашборда «Анализ отчётов резидентов» от DataCraft"
     ]
+  },
+  {
+    type: "project",
+    id: "women-in-tech",
+    title: "Women in Tech",
+    agendaNote: "Концепция · GAP Women, Tumaris Tech, Youth Skills",
+    frame: "plain",
+    frameLabel: "Схема платформы",
+    screenshots: [
+      { src: "shots/wit-scheme.jpg", label: "Схема" }
+    ],
+    description: "Единая цифровая платформа для женщин в IT: объединяет три сайта (it-gap.uz, tumaris.tech, youthskills.uz) с общей регистрацией, каталогом программ, онлайн-заявками, личным кабинетом, админ-панелью и аналитикой.",
+    docs: [
+      {
+        title: "Концепция проекта Women in Tech",
+        file: "docs/women-in-tech.docx",
+        pages: ["shots/wit-doc-1.jpg", "shots/wit-doc-2.jpg", "shots/wit-doc-3.jpg"]
+      }
+    ],
+    questions: [
+      "Утвердить концепцию проекта"
+    ]
   }
 ];
 
@@ -622,6 +649,17 @@ function renderReport(p) {
     </div>
   </div>`;
 }
+function renderFigure(p) {
+  const x = shotsOf(p)[0];
+  return `<div class="report-col">
+    <div class="report">
+      <div class="report-head"><span>${esc(p.frameLabel || "Схема")}</span><b>${esc(p.title)}</b></div>
+      <button class="figure-btn" type="button" data-lightbox="${p.id}" aria-label="Открыть схему на весь экран">
+        <img id="shotimg-${p.id}" src="${esc(x.src)}" alt="${esc(p.frameLabel || "Схема")} ${esc(p.title)}"><span class="zoom">Увеличить</span>
+      </button>
+    </div>
+  </div>`;
+}
 function renderProject(p) {
   const k = projects.indexOf(p) + 1;
   const pr = progressText(p);
@@ -629,7 +667,7 @@ function renderProject(p) {
     <li><label class="q" for="q-${p.id}-${i}">
       <input type="checkbox" id="q-${p.id}-${i}" data-p="${p.id}" data-i="${i}" ${checked(p, i) ? "checked" : ""}>
       <span>${esc(q)}</span></label></li>`).join("");
-  const left = p.status ? renderReport(p) : `
+  const left = p.status ? renderReport(p) : p.frame === "plain" ? renderFigure(p) : `
     <div class="shot-col">
     <div class="browser">
       <div class="chrome"><span class="lights"><i></i><i></i><i></i></span>
@@ -779,6 +817,7 @@ function thumbHTML(s, k) {
   let mini;
   if (s.type === "title") mini = `<div class="mini accent"><span class="t">${esc(MEETING.title)}</span></div>`;
   else if (s.type === "summary") mini = `<div class="mini"><span class="t">Итоги встречи</span></div>`;
+  else if (s.frame === "plain") mini = `<div class="mini" style="background:#fff"><img src="${esc(shotsOf(s)[0].src)}" alt="" style="object-fit:contain"></div>`;
   else if (s.status) mini = `<div class="mini"><span class="t">${esc(s.title)}</span></div>`;
   else mini = `<div class="mini">${shotsOf(s).length ? `<img src="${esc(shotsOf(s)[0].src)}" alt="">` : ICON_GLOBE}</div>`;
   const name = s.type === "title" ? "Титульный" : s.type === "summary" ? "Итоги и решения" : s.title;
